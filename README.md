@@ -1,2 +1,13 @@
 # RewardMan
-A web application for specialized promotion of user achievements, as well as convenient ranking of their skills and competencies
+
+Веб-приложение для специализированного продвижения достижений пользователей, а также удобного ранжирования их навыков и компетенций
+
+## Содержание
+
+## Введение
+
+## Структура репозитория
+
+## Полезные материалы
+
+## 
