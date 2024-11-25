@@ -8,8 +8,10 @@ import React from "react";
 
 import { SettingsScreen } from "./src/pages/SettingsPage";
 import { ProfileScreen } from "./src/pages/ProfilePage";
+import { CursesScreen } from "./src/pages/Curses";
 import { HomeScreen } from "./src/pages/HomePage";
 import { AuthScreen } from "./src/pages/AuthPage";
+import { StatScreen } from "./src/pages/StatPage";
 
 export default function App() {
 	return (
@@ -33,6 +35,16 @@ export default function App() {
 				<Stack.Screen
 					name="Home"
 					component={HomeScreen}
+				/>
+
+        <Stack.Screen
+					name="Stat"
+					component={StatScreen}
+				/>
+
+      <Stack.Screen
+					name="Curses"
+					component={CursesScreen}
 				/>
 
 				<Stack.Screen
