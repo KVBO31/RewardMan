@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, SafeAreaView, StyleSheet } from "react-native";
 
 
-export const HomeScreen = () => {
+export const StatScreen = () => {
     return (
         <SafeAreaView>
             <Text>Ужас</Text>
