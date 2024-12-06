@@ -13,6 +13,9 @@ import { HomeScreen } from "./src/pages/HomePage";
 import { AuthScreen } from "./src/pages/AuthPage";
 import { StatScreen } from "./src/pages/StatPage";
 
+// создаем экземпляр объекта навигатора состояний
+const Stack = createStackNavigator();
+
 export default function App() {
 	return (
 		<NavigationContainer>
