@@ -5,7 +5,7 @@ import {
 	SafeAreaView,
 	StyleSheet,
 	TextInput,
-	Button,
+	TouchableOpacity,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -21,19 +21,32 @@ export const AuthScreen = () => {
 	// showChangePassword - переменная для отображения кнопки смены пароля
 	const [showPassword, setShowPassword] = useState(false);
 
+	// функция отправки данных на сервер
+	const sendDataToServer = () => {
+		if (login != "" && password != "") {
+			console.log(login, password);
+		} else{
+			console.log("Error: empty fields");
+		}
+
+		// сбрасываем значение для большей безопасности
+		setLogin("");
+		setPassword("");
+	};
+
 	return (
 		<SafeAreaView style={styles.container}>
-                
-                <View style={styles.blockTextInput}>
-                        {/* Поле ввода значения ЛОГИНА пользователя */}
-                        <TextInput
-                            style={styles.textInput}
-                            placeholder="Логин:"
-                            autoFocus={true}
-                            onChangeText={(login) => setLogin(login)}
-                            value={login}
-                        />
-                </View>
+			<View style={styles.mainBlock}>
+				<View style={styles.blockTextInput}>
+					{/* Поле ввода значения ЛОГИНА пользователя */}
+					<TextInput
+						style={styles.textInput}
+						placeholder="Логин:"
+						autoFocus={true}
+						onChangeText={(login) => setLogin(login)}
+						value={login}
+					/>
+				</View>
 
 				<View style={styles.blockTextInput}>
 					{/* Поле ввода значения ПАРОЛЯ пользователя*/}
@@ -48,7 +61,7 @@ export const AuthScreen = () => {
 					{/* Иконка - кнопка глаза, изменяющее состояние видимости пароля */}
 					<MaterialCommunityIcons
 						name={showPassword ? "eye-off" : "eye"}
-						size={24}
+						size={28}
 						color="#aaa"
 						style={styles.icon}
 						onPress={() => setShowPassword(!showPassword)}
@@ -56,10 +69,10 @@ export const AuthScreen = () => {
 				</View>
 
 				{/* Кнопка отправки данных на сервер */}
-				<Button
-					title="Войти"
-					onPress={() => console.log("Отправлено:", login, password)}
-				/>
+				<TouchableOpacity style={styles.button} onPressOut={sendDataToServer}>
+					<Text style={styles.buttonText}>Войти</Text>
+				</TouchableOpacity>
+			</View>
 		</SafeAreaView>
 	);
 };
@@ -75,23 +88,45 @@ const styles = StyleSheet.create({
 		backgroundColor: "#181818",
 	},
 
+	mainBlock: {
+		width: "40%",
+		flex: 1,
+		alignContent: "center",
+		justifyContent: "center",
+	},
+
 	blockTextInput: {
 		flexDirection: "row",
 		alignItems: "center",
 		justifyContent: "center",
 		backgroundColor: "#f3f3f3",
-		paddingHorizontal: 14,
-		
 	},
 
 	textInput: {
-		height: 40,
-		borderColor: "black",
-		borderWidth: 1,
-		marginBottom: 10,
-		padding: 10,
+		justifyContent: "center",
+		margin: "auto",
+		padding: "7%",
 		backgroundColor: "#f3f3f3",
 		color: "black",
+		width: "100%",
+	},
+
+	icon: {
+		marginRight: "5%"
+	},
+
+	button: {
+		width: "100%",
+		height: "5%",
+		backgroundColor: "#4CAF50",
+	},
+
+	buttonText: {
+		display: "flex",
+		justifyContent: "center",
+		textAlign: "center",
+		fontFamily: "Arial",
 		fontWeight: "bold",
+		margin: "auto"
 	},
 });
