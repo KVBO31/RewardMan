@@ -1,132 +1,254 @@
-import React, { useState } from "react";
-import {
-	View,
-	Text,
-	SafeAreaView,
-	StyleSheet,
-	TextInput,
-	TouchableOpacity,
-} from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+// 
+// Страница авторизации пользователей
+//
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, SafeAreaView, StyleSheet, TextInput, TouchableOpacity, Dimensions } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+// импорт констант из файла с конфигурациями
+import { URL } from '../../config';
 
 // Экспортируемый экран авторизации
-export const AuthScreen = () => {
-	// переменные состояний
-	// message - переменная текста над полями авторизации
-	const [message, setMessage] = useState("ВВЕДИТЕ ЛОГИН И ПАРОЛЬ");
-	// login - переменная логина пользователя (по умолчанию отсутствует)
-	const [login, setLogin] = useState("");
-	// password - переменная пароля пользователя (по умолчанию отсутствует)
-	const [password, setPassword] = useState("");
-	// showChangePassword - переменная для отображения кнопки смены пароля
-	const [showPassword, setShowPassword] = useState(false);
+export const AuthScreen = ({ navigation }) => {
+    const { width } = Dimensions.get('window');
+    // Ширина основного блока в зависимости от ширины экрана
+    const mainBlockWidth = width < 400 ? '85%' : '34%';
 
-	// функция отправки данных на сервер
-	const sendDataToServer = () => {
-		if (login != "" && password != "") {
-			console.log(login, password);
-		} else{
-			console.log("Error: empty fields");
-		}
+    // Состояния для управления вводом и авторизацией
+    const [message, setMessage] = useState('ВВЕДИТЕ ЛОГИН И ПАРОЛЬ');
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-		// сбрасываем значение для большей безопасности
-		setLogin("");
-		setPassword("");
-	};
+    // Проверка сохранённой сессии при монтировании
+    useEffect(() => {
+        console.log("Auth open");
+        const token = localStorage.getItem('authToken');
+        const expiresAt = localStorage.getItem('expiresAt');
+    
+        if (token && expiresAt && Date.now() < expiresAt) {
+            setIsAuthenticated(true);
+            navigation.navigate('Home'); // Перенаправляем на главную страницу
+        } else {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('expiresAt');
+        }
+    }, []);
+    
 
-	return (
-		<SafeAreaView style={styles.container}>
-			<View style={styles.mainBlock}>
-				<View style={styles.blockTextInput}>
-					{/* Поле ввода значения ЛОГИНА пользователя */}
-					<TextInput
-						style={styles.textInput}
-						placeholder="Логин:"
-						autoFocus={true}
-						onChangeText={(login) => setLogin(login)}
-						value={login}
-					/>
-				</View>
+    // Функция обновления токена (пример)
+    const refreshAuthToken = async () => {
+        try {
+            const response = await fetch(`${URL}/refresh`, {
+                method: 'POST',
+                credentials: 'include', // Передача cookie для refresh
+            });
+            const data = await response.json();
+            const { access, expiresIn } = data;
 
-				<View style={styles.blockTextInput}>
-					{/* Поле ввода значения ПАРОЛЯ пользователя*/}
-					<TextInput
-						secureTextEntry={!showPassword}
-						style={styles.textInput}
-						placeholder="Пароль:"
-						onChangeText={(passw) => setPassword(passw)}
-						value={password}
-					/>
+            if (access) {
+                const expiresAt = Date.now() + expiresIn * 1000;
+                localStorage.setItem('authToken', access);
+                localStorage.setItem('expiresAt', expiresAt);
+                setIsAuthenticated(true);
+            }
+        } catch (error) {
+            console.error('Ошибка обновления токена:', error);
+        }
+    };
 
-					{/* Иконка - кнопка глаза, изменяющее состояние видимости пароля */}
-					<MaterialCommunityIcons
-						name={showPassword ? "eye-off" : "eye"}
-						size={28}
-						color="#aaa"
-						style={styles.icon}
-						onPress={() => setShowPassword(!showPassword)}
-					/>
-				</View>
+    // Авторизация пользователя
+    const sendDataToServerAuth = async () => {
+        if (login !== '' && password !== '') {
+            try {
+                // формирование POST запроса на сервер с постфиксом auth
+                const response = await fetch(`${URL}/auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        login,
+                        password,
+                    }),
+                });
+    
+                // Проверка кода статуса ответа
+                if (response.ok) { // Статус 2xx, успешная авторизация
+                    const data = await response.json();
+                    const { access, refresh, expiresIn } = data;
+    
+                    if (access) {
+                        const expiresAt = Date.now() + expiresIn * 1000;
+                        localStorage.setItem('authToken', access);
+                        localStorage.setItem('expiresAt', expiresAt);
+                        console.log('Access token сохранён:', access);
+                        console.log('Refresh token получен и хранится в куках автоматически');
+    
+                        setIsAuthenticated(true);
+                        navigation.navigate('Home');
+                    }
+                } else {
+                    // Обработка различных кодов ошибок
+                    switch (response.status) {
+                        case 401:
+                            AlertBox("Неверно указан логин или пароль");
+                            setMessage('Неверный логин или пароль');
+                            break;
+                        case 500:
+                            setMessage('Ошибка сервера, попробуйте позже');
+                            break;
+                        default:
+                            setMessage('Произошла неизвестная ошибка, попробуйте позже');
+                            break;
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка при авторизации:', error);
+                AlertBox("нет соединения с сервером");
+                setMessage('Не удалось подключиться к серверу. Попробуйте позже.');
+            }
+        } else {
+            setMessage('Поля логина и пароля не могут быть пустыми');
+        }
+    
+        // Очистка полей после попытки авторизации
+        setLogin('');
+        setPassword('');
+    };
+    
 
-				{/* Кнопка отправки данных на сервер */}
-				<TouchableOpacity style={styles.button} onPressOut={sendDataToServer}>
-					<Text style={styles.buttonText}>Войти</Text>
-				</TouchableOpacity>
-			</View>
-		</SafeAreaView>
-	);
+    // Логика выхода из аккаунта
+    const logout = () => {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('expiresAt');
+        setIsAuthenticated(false);
+        navigation.navigate('Auth');
+    };
+
+    // Интерфейс страницы
+    return (
+        <SafeAreaView style={styles.container}>
+            <View style={[styles.mainBlock, { width: mainBlockWidth }]}>
+
+                <Text style={styles.topText}>{message}</Text>
+
+                <View style={styles.blockTextInput}>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Логин или почта:"
+                        autoFocus={true}
+                        onChangeText={login => setLogin(login)}
+                        value={login}
+                    />
+                </View>
+
+                <View style={styles.blockTextInput}>
+                    <TextInput
+                        secureTextEntry={!showPassword}
+                        style={styles.textInput}
+                        placeholder="Пароль:"
+                        onChangeText={passw => setPassword(passw)}
+                        value={password}
+                    />
+
+                    <MaterialCommunityIcons
+                        name={showPassword ? 'eye-off' : 'eye'}
+                        size={28}
+                        color="#aaa"
+                        style={styles.icon}
+                        onPress={() => setShowPassword(!showPassword)}
+                    />
+                </View>
+
+                <TouchableOpacity style={styles.button.active} onPressOut={sendDataToServerAuth}>
+                    <Text style={styles.buttonText}>Войти</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.button.inactive} onPressOut={() => { navigation.navigate("Reg"); }}>
+                    <Text style={styles.buttonText}>Регистрация</Text>
+                </TouchableOpacity>
+            </View>
+        </SafeAreaView>
+    );
 };
 
 // Конструктор стилей для экрана авторизации
 const styles = StyleSheet.create({
-	container: {
-		alignItems: "center",
-		alignContent: "center",
-		justifyContent: "center",
-		flex: 1,
+    container: {
+        alignItems: 'center',
+        alignContent: 'center',
+        justifyContent: 'center',
+        flex: 1,
+        backgroundColor: '#21292c',
+    },
 
-		backgroundColor: "#181818",
-	},
+    mainBlock: {
+        flex: 1,
+        alignContent: 'center',
+        justifyContent: 'center',
+    },
 
-	mainBlock: {
-		width: "40%",
-		flex: 1,
-		alignContent: "center",
-		justifyContent: "center",
-	},
+    blockTextInput: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f3f3f3',
 
-	blockTextInput: {
-		flexDirection: "row",
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: "#f3f3f3",
-	},
+        borderWidth: .5,
+    },
 
-	textInput: {
-		justifyContent: "center",
-		margin: "auto",
-		padding: "7%",
-		backgroundColor: "#f3f3f3",
-		color: "black",
-		width: "100%",
-	},
+    textInput: {
+        justifyContent: 'center',
+        margin: 'auto',
+        padding: '7%',
+        backgroundColor: '#f3f3f3',
+        color: 'black',
+        width: '100%',
 
-	icon: {
-		marginRight: "5%"
-	},
+        fontFamily: "Arial"
+    },
 
-	button: {
-		width: "100%",
-		height: "5%",
-		backgroundColor: "#4CAF50",
-	},
+    icon: {
+        marginRight: '5%',
+    },
 
-	buttonText: {
-		display: "flex",
-		justifyContent: "center",
-		textAlign: "center",
-		fontFamily: "Arial",
-		fontWeight: "bold",
-		margin: "auto"
-	},
+    button: {
+        active: {
+            width: '100%',
+            height: '10%',
+            backgroundColor: '#007bb7',
+        },
+
+        inactive: {
+            width: '100%',
+            height: '10%',
+            backgroundColor: '#374e59',
+        }
+    },
+
+    buttonText: {
+        display: 'flex',
+        justifyContent: 'center',
+        textAlign: 'center',
+        fontFamily: 'Arial',
+        fontWeight: 'bold',
+        margin: 'auto',
+
+        color: '#e2e8e9',
+        fontSize: '1.25rem',
+    },
+
+    topText: {
+        textAlign: "center",
+        justifyContent: "center",
+
+        fontSize: '1.05rem',
+        color: '#e2e8e9',
+        margin: '5%',
+        padding: "auto",
+        fontFamily: 'Arial'
+    }
 });
