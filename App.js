@@ -12,6 +12,7 @@ import { CursesScreen } from "./src/pages/Curses";
 import { HomeScreen } from "./src/pages/HomePage";
 import { AuthScreen } from "./src/pages/AuthPage";
 import { StatScreen } from "./src/pages/StatPage";
+import { RegScreen } from "./src/pages/RegPage";
 
 // создаем экземпляр объекта навигатора состояний
 const Stack = createStackNavigator();
@@ -23,7 +24,7 @@ export default function App() {
 				initialRouteName="Auth"
 				screenOptions={{
 					headerStyle: {
-						backgroundColor: "#ffffff",
+						backgroundColor: "#f0f0f0",
 					},
 				}}
 			>
@@ -36,29 +37,22 @@ export default function App() {
 				/>
 
 				<Stack.Screen
-					name="Home"
-					component={HomeScreen}
+					name="Reg"
+					component={RegScreen}
+					options={{
+						headerShown: false,
+					}}
 				/>
 
-        <Stack.Screen
-					name="Stat"
-					component={StatScreen}
-				/>
+				<Stack.Screen name="Home" component={HomeScreen} />
 
-      <Stack.Screen
-					name="Curses"
-					component={CursesScreen}
-				/>
+				<Stack.Screen name="Stat" component={StatScreen} />
 
-				<Stack.Screen
-					name="Profile"
-					component={ProfileScreen}
-				/>
+				<Stack.Screen name="Curses" component={CursesScreen} />
 
-				<Stack.Screen
-					name="Settings"
-					component={SettingsScreen}
-				/>
+				<Stack.Screen name="Profile" component={ProfileScreen} />
+
+				<Stack.Screen name="Settings" component={SettingsScreen} />
 			</Stack.Navigator>
 		</NavigationContainer>
 	);
