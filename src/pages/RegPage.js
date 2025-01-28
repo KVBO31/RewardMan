@@ -6,8 +6,8 @@ import {
     Text,
     TouchableOpacity,
     Dimensions,
-    Alert
 } from "react-native";
+import { useAlert } from "../components/Notification";
 
 import { URL } from "../../config";
 
@@ -25,11 +25,12 @@ export const RegScreen = ({navigation}) => {
     const [password1, setPassword1] = useState("");
     const [password2, setPassword2] = useState("");
     const [loading, setLoading] = useState(false);
+    const showAlert = useAlert();
 
     const handleLogin = async () => {
         // Проверка на пустую строчку и на соответствие паролей
         if (password1 != password2 && password1 != "") {
-            Alert.alert("Hello");
+            showAlert("Ошибка: пароли не совпадают!")
             return ;
         }
 
@@ -75,7 +76,7 @@ export const RegScreen = ({navigation}) => {
 
             <TextInput
                 style={[styles.input, { width: inputButtonWidth }]}
-                placeholder="Пароль"
+                placeholder="Пароль*"
                 secureTextEntry
                 value={password1}
                 onChangeText={setPassword1}
@@ -83,7 +84,7 @@ export const RegScreen = ({navigation}) => {
 
             <TextInput
                 style={[styles.input, { width: inputButtonWidth }]}
-                placeholder="Повторите пароль"
+                placeholder="Повторите пароль*"
                 secureTextEntry
                 value={password2}
                 onChangeText={setPassword2}
@@ -115,12 +116,14 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         padding: 20,
-        backgroundColor: "#f9f9f9",
+
+        backgroundColor: "#181818",
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 20,
+        color: "#f9f9f9"
     },
     input: {
         height: 40,
