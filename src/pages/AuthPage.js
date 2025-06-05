@@ -31,7 +31,7 @@ export const AuthScreen = ({ navigation }) => {
 		setLoading(true);
 
 		try {
-			const response = await fetch(`${URL}/auth`, {
+			const response = await fetch(`${URL}/api/auth`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

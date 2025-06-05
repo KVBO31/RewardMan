@@ -26,6 +26,7 @@
     "react-native-web": "~0.19.13",
     "react-navigation-stack": "^2.10.4"
   },
+  "proxy": "http://localhost:5000",
   "devDependencies": {
     "@babel/core": "^7.20.0"
   },
