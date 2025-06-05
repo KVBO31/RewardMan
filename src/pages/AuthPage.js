@@ -34,16 +34,20 @@ export const AuthScreen = ({ navigation }) => {
 			const response = await fetch(`${URL}/api/auth`, {
 				method: "POST",
 				headers: {
-					"Content-Type": "application/json",
+					Accept: "application/json, text/plain",
+					"Content-Type": "application/json;charset=UTF-8",
 				},
 				body: JSON.stringify({
-					email: email,
+					login: email,
 					password: password,
 				}),
-				credentials: "include"
 			});
 
 			const data = await response.json();
+			if (data.authenticated == true){
+				console.log("Успешно")
+				navigation.navigate("Home");
+			}
 			setLoading(false);
 		} catch (error) {
 			setLoading(false);

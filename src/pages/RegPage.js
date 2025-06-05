@@ -46,13 +46,14 @@ export const RegScreen = ({ navigation }) => {
 					"Content-Type": "application/json;charset=UTF-8",
 				},
 				body: JSON.stringify({
-					login,
-					email,
-					password1,
+					login: login,
+					email: email,
+					password: password1,
 				}),
 			});
 			// получаем ответ
 			const data = await response.json();
+			console.log(data);
 			setLoading(false);
 			if (data.registered == true) {
 				navigation.navigate("Auth");
