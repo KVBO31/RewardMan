@@ -53,7 +53,6 @@ export const RegScreen = ({ navigation }) => {
 			});
 			// получаем ответ
 			const data = await response.json();
-			console.log(data);
 			setLoading(false);
 			if (data.registered == true) {
 				navigation.navigate("Auth");

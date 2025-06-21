@@ -45,8 +45,7 @@ export const AuthScreen = ({ navigation }) => {
 
 			const data = await response.json();
 			if (data.authenticated == true){
-				console.log("Успешно")
-				navigation.navigate("Home");
+				navigation.replace("Home");
 			}
 			setLoading(false);
 		} catch (error) {
